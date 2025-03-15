@@ -9,7 +9,8 @@ A lot of gratitude to all the developers whose codes has been used here.
 ## 15.03.2025 Изменения(Changes)
 
 -Конвертер txt->bin встроен в программу (The txt->bin converter is built into the program)
-  Использование(Used):
+
+Использование(Used):
    при запуске Rotor-Cuda.exe будут созданны два примера батников для конвертирования
    (at startup Rotor-Cuda.exe two examples of batch files for conversion will be created.)
    
