@@ -4,9 +4,9 @@
 This is a modified version of [KeyHunt v1.7](https://github.com/kanhavishva/KeyHunt-Cuda).
 A lot of gratitude to all the developers whose codes has been used here.
 
+############################################################################################
 
-
-###15.03.2025 Изменения(Changes)
+## 15.03.2025 Изменения(Changes)
 
 -Конвертер txt->bin встроен в программу (The txt->bin converter is built into the program)
   Использование(Used):
