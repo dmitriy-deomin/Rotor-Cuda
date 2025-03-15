@@ -106,9 +106,6 @@ C:\Users\user>Rotor-Cuda.exe -t 6 -m addresses --coin BTC --range 1000000:ffffff
   Bytes        : 171873140 (163 MB)
   Hash funcs   : 20
 
-  Site         : https://github.com/phrutis/Rotor-Cuda
-  Donate       : bc1qh2mvnf5fujg93mwl8pe688yucaw9sflmwsukz9
-
   Start Time   : Sun Nov  7 23:46:43 2021
   Global start : 1000000 (25 bit)
   Global end   : FFFFFFFFFFFFF (52 bit)
@@ -151,9 +148,6 @@ Rotor-Cuda v1.05 (07.11.2021)
   Bits/Elem    : 28.755175
   Bytes        : 171873140 (163 MB)
   Hash funcs   : 20
-
-  Site         : https://github.com/phrutis/Rotor-Cuda
-  Donate       : bc1qh2mvnf5fujg93mwl8pe688yucaw9sflmwsukz9
 
   Start Time   : Sun Nov  7 23:56:05 2021
   Rotor        : Continuing search from BAT file. Checkpoint created: Sun Nov  7 23:54:13 2021
@@ -202,11 +196,7 @@ C:\Users\user>Rotor-Cuda.exe -t 6 -m addresses --coin BTC -i all.bin -r 1 -n 253
   Bytes        : 171873140 (163 MB)
   Hash funcs   : 20
 
-  Site         : https://github.com/phrutis/Rotor-Cuda
-  Donate       : bc1qh2mvnf5fujg93mwl8pe688yucaw9sflmwsukz9
-
   Start Time   : Sun Nov  7 23:58:07 2021
-
 
   ROTOR Random : Private keys random 253 <~> 254 (bit)
   Base Key     : Randomly changes 6 Private keys every 1,000,000,000 on the counter
@@ -406,9 +396,6 @@ Rotor-Cuda.exe -g --gpui 0 --gpux 256,256 -m xpoints --coin BTC -r 100 --range 7
   Bytes        : 1752154 (1 MB)
   Hash funcs   : 20
 
-  Site         : https://github.com/phrutis/Rotor-Cuda
-  Donate       : bc1qh2mvnf5fujg93mwl8pe688yucaw9sflmwsukz9
-
   Start Time   : Mon Nov  8 00:06:12 2021
 
   GPU          : GPU #0 NVIDIA GeForce RTX 2070 (36x64 cores) Grid(256x256)
@@ -440,17 +427,6 @@ C:\Users\user>Rotor-Cuda.exe -g --gpui 0 --gpux 256,256 -m address --coin eth --
   GPU          : GPU #0 NVIDIA GeForce RTX 2070 (36x64 cores) Grid(256x256)
   [00:00:42] [F: 0] [Y:156 D:015] [C: 0.000001 %] [GPU: 468.58 Mk/s] [T: 20,266,876,928]
 ```
-## Building
-### Windows
-- Microsoft Visual Studio Community 2019
-- CUDA version [**10.22**](https://developer.nvidia.com/cuda-10.2-download-archive?target_os=Windows&target_arch=x86_64&target_version=10&target_type=exenetwork)
-#### For RTX 3060, 3070, 3080, 3090, A5000, A6000, A100
-- Use CUDA 11.7
-- Rename [this file](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/Rotor-Cuda30xx.vcxproj) (remove 30xx) from the name and replace the file in the project
-#### For RTX 2060, 2070, 2080
-- Use CUDA 11.7
-- Rename [this file](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/Rotor-Cuda20xx.vcxproj) (remove 20xx) from the name and replace the file in the project
-
 ## License
 - Rotor-Cuda is licensed under GPLv3.
 
