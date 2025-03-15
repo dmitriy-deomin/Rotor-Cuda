@@ -13,7 +13,11 @@
 #include <unistd.h>
 #endif
 
-#define RELEASE "1.07 (25.11.2021)"
+//
+#include "my_integrated_code.h"
+//
+
+#define RELEASE "1.07                         (15.03.2025)"
 
 using namespace std;
 bool should_exit = false;
@@ -58,6 +62,8 @@ void usage()
 	printf("-n, --next                               : Random mode: What bit range to randomize? -n 1-256 Example -n 252 Default: 252-256 bit\n");
 	printf("-z, --zet                                : Random mode: End range for random. Example -n 48 -z 52 (random in 48,49,50,51,52 bit) Default: false\n");
 	printf("-d, --display                            : Disable all informers, compact version for many GPUs. Use -d 0 Default -d 1 (display all) \n");
+	printf("-convertFileETH                          : Сonverting a list of eth addresses to a bin file (-convertFileETH eth.txt) \n");
+	printf("-convertFileBTC                          : Сonverting a list of btc addresses to a bin file (-convertFileBTC btc.txt) \n");
 }
 
 // ----------------------------------------------------------------------------
@@ -198,6 +204,335 @@ void CtrlHandler(int signum) {
 
 int main(int argc, char** argv)
 {
+	//*****************************************************************************
+	 
+	enableAnsiCodes();  //что бы цвета работали в консоли
+	setlocale(LC_ALL, "Russian");// Установка русской локали
+
+	cout << zagolovok << endl;
+	cout << "[+] =====================================================" << endl;
+	cout << "[+] ROTOR-CUDA v" << RELEASE << endl;
+	cout << "[+] =====================================================\n" << endl;
+	cout << grey;
+
+	if (argc == 1) {  // argc == 1 означает, что параметры командной строки отсутствуют
+		printHelp();
+		cout << text_close;
+		cout << endl << "окно можно закрыть";
+		cin.get();
+		return 0;
+	}
+
+	//если запущен режим конвертации
+	//-----------------------------------------------------------------
+	if (strcmp(argv[1], "-convertFileETH") == 0) {
+		// Установка русской локали
+		setlocale(LC_ALL, "Russian");
+		cout << zagolovok;
+		cout << "[+] ********РЕЖИМ КОНВЕРТАЦИИ ETH********\n";
+		cout << "\033[90m"; //голубой
+		cout << "[+] АДРЕССА ВИДА:\n";
+		cout << "[+] ETH\n";
+		cout << "[+] 0xbC75b3f4Dc162C7a8aBF885822be0bcAa6FCeeB3\n";
+		cout << "[+] bC75b3f4Dc162C7a8aBF885822be0bcAa6FCeeB3\n";
+		cout << "[+] TRX\n";
+		cout << "[+] TT9h3GV9ePs6CV4jcH4gB3jskb6zh6WC4e\n";
+		cout << "\033[96m"; //голубой
+		string infile = argv[2];
+
+		// Создаем массив символов для хранения строки без расширения
+		char outfile[256];
+		char convfile[256] = "convfile.tmp";
+		strncpy(outfile, infile.c_str(), sizeof(outfile));  // Копируем строку infile в outfile
+
+		// Найдем последнюю точку в строке
+		char* dot = strrchr(outfile, '.');
+
+		// Проверим, что точка найдена и это именно ".txt"
+		if (dot && strcmp(dot, ".txt") == 0) {
+			// Заменяем расширение .txt на .bin
+			strcpy(dot, ".bin");
+		}
+
+		// Печатаем результат
+		cout << "\n[+] ВХОДНОЙ ФАЙЛ: " << white << infile << grey << " -> КОНВЕРТИРОВАННЫЙ+СОРТИРОВАНЫЙ: " << white << outfile << grey << endl;
+
+		// Открытие входного файла
+		std::ifstream stream(infile.c_str());
+		cout << "[+] ОТКРЫВАЕМ ФАЙЛ: " << white << infile << grey << endl;
+		if (!stream) {
+			cout << "\033[31m"; //красный
+			cout << "[-] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+			cerr << "[-] ОШИБКА,НЕ УДАЛОСЬ ОТКРЫТЬ ФАЙЛ: '" << infile << "'" << endl;
+			cout << "[-] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+			cin.get();  // Ждем ввода пользователя
+			// Аварийное завершение программы
+			std::abort();
+		}
+
+		// Открытие выходного файла в бинарном режиме
+		FILE* file = fopen(convfile, "wb");
+		if (!file) {
+			std::perror("[-] Ошибка при открытии выходного файла");
+			return false;
+		}
+
+		string buffer;
+		int nr = 0;
+		int totalLines = 0;
+
+		// Подсчитаем количество строк для вывода прогресса
+		while (std::getline(stream, buffer)) {
+			totalLines++;
+		}
+		stream.clear(); // сбрасываем состояние потока
+		stream.seekg(0); // возвращаемся в начало файла
+
+		cout << "[+] КОНВЕРТИРОВАНИЕ" << endl;
+		hash160_20 h;
+		memset(&h, 0, sizeof(h));
+		try {
+			while (std::getline(stream, buffer)) {
+
+				// Проверка, что строка не пустая
+				if (buffer.length() == 0) {
+					continue;
+				}
+
+
+				//если строка длинее 34(trx) значить она eth
+				if (buffer.size() == 34) {
+					// Попытка декодирования Base58
+					vector<unsigned char> binding;
+					// Попытка декодирования Base58
+					if (!DecodeBase58(buffer, binding)) {
+						cerr << "[-] Ошибка декодирования Base58 на строке: " << nr + 1 << endl;
+						continue; // Пропускаем этот адрес и переходим к следующему
+					}
+					// Проверка длины и копирование в массив размером 20 байт
+					if (binding.size() >= 21) {
+						std::array<unsigned char, 20> a;
+						std::copy(binding.begin() + 1, binding.begin() + 21, a.begin());
+
+						// Копирование 20 байтов в структуру хэша
+						for (int i = 0; i < 20; i++) {
+							h.bits20[i] = a[i];
+						}
+					}
+				}
+				else {
+					if (buffer.size() > 2 && (buffer[0] == '0' && (buffer[1] == 'x' || buffer[1] == 'X'))) {
+						buffer = buffer.substr(2); // Убираем "0x"   
+					}
+
+					// Проверка, что строка имеет корректную длину для 20 байт (40 символов в hex)
+					if (buffer.length() != 40) {
+						cerr << "[-] Некорректная длина строки: " << buffer << endl;
+						continue;
+					}
+
+					// Конвертация hex строки в байты
+					char buf[20] = { 0 };
+					readHex(buf, buffer.c_str());
+
+					// Копирование 20 байтов в структуру хэша
+					for (int i = 0; i < 20; i++) {
+						h.bits20[i] = buf[i];
+					}
+				}
+
+				// Запись хэша в файл (в бинарном режиме)
+				if (fwrite(h.bits20, 1, 20, file) != 20) {
+					cerr << "[-] Ошибка записи в файл на строке: " << nr + 1 << endl;
+					fclose(file);
+					return false;
+				}
+
+				// Инкремент счётчика строк
+				nr++;
+
+				// Вывод обновляемого прогресса каждые 100000 строк
+				if (nr % counterPROGRESS == 0 || nr == totalLines) {
+					cout << "\r[+] " << nr << "/" << totalLines;
+					cout.flush();  // обновляем строку без новой строки
+				}
+			}
+		}
+		catch (...) {
+			cerr << "[-] Произошла ошибка при обработке файла." << endl;
+			fclose(file);
+			return false;
+		}
+
+		// Закрытие файлов
+		fclose(file);
+		stream.close();
+
+		cout << endl; // Перевод строки после завершения работы
+		cout << "[+] ГОТОВО\n" << endl;
+		cout << "[+] СОРТИРОВКА:" << convfile << endl;
+
+
+		sort_file(20, convfile, outfile);
+
+		//удаляем временный convfile
+		if (remove(convfile) != 0) {
+			cout << "\033[31m"; //красный
+			cout << "\n[+] НЕУДАЛОСЬ УДАЛИТЬ:\n" << convfile << " УДАЛИТЕ ВРУЧНУЮ" << endl;
+		}
+
+		cout << "\n[+] ГОТОВО:" << outfile << endl;
+
+		// Ожидаем нажатия клавиши Enter, чтобы программа не закрывалась сразу
+		cout << text_close;
+		cout << "окно можно закрыть";
+		cin.get();  // Ждем ввода пользователя
+		return 0;
+	}
+
+	if (strcmp(argv[1], "-convertFileBTC") == 0) {
+		// Установка русской локали
+		setlocale(LC_ALL, "Russian");
+		cout << "\033[92m"; //ярко-зелёный
+		cout << "[+] ********РЕЖИМ КОНВЕРТАЦИИ BTC********\n";
+		cout << "\033[90m"; //голубой
+		cout << "[+] АДРЕССА ВИДА:\n";
+		cout << "[+] BTC(и аналогичные ему)\n";
+		cout << "[+] 17Xawwqd8bZiXcEKsCEFWVEad3TrmncPsF\n";
+		cout << "[+] 3MDDvsiHEKGyyV4XXWbMT7mW5etzvczF3g\n";
+		cout << "[+] bc1qfrsxj0g29y08msesvckqcsehanrtvfgkthjgmk\n";
+		cout << "\033[96m"; //голубой
+		string infile = argv[2];
+
+		// Создаем массив символов для хранения строки без расширения
+		char outfile[256];
+		char convfile[256] = "convfile.tmp";
+		strncpy(outfile, infile.c_str(), sizeof(outfile));  // Копируем строку infile в outfile
+
+		// Найдем последнюю точку в строке
+		char* dot = strrchr(outfile, '.');
+
+		// Проверим, что точка найдена и это именно ".txt"
+		if (dot && strcmp(dot, ".txt") == 0) {
+			// Заменяем расширение .txt на .bin
+			strcpy(dot, ".bin");
+		}
+
+		// Печатаем результат
+		cout << "\n[+] ВХОДНОЙ ФАЙЛ: " << white << infile << grey << " -> КОНВЕРТИРОВАННЫЙ+СОРТИРОВАНЫЙ: " << white << outfile << grey << endl;
+
+		// Открытие входного файла
+		std::ifstream stream(infile.c_str());
+		std::cout << "\n[+] ОТКРЫВАЕМ ФАЙЛ: " << white << infile << grey << endl;
+		if (!stream) {
+			std::cout << "\033[31m"; //красный
+			std::cout << "[-] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "\n";
+			std::cerr << "[-] ОШИБКА,НЕ УДАЛОСЬ ОТКРЫТЬ ФАЙЛ: '" << infile << "'" << endl;
+			std::cout << "[-] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "\n";
+			std::cin.get();  // Ждем ввода пользователя
+			// Аварийное завершение программы
+			std::abort();
+		}
+
+		// Открытие выходного файла в бинарном режиме
+		FILE* file = fopen(convfile, "wb");
+		if (!file) {
+			std::perror("Ошибка при открытии выходного файла");
+			return false;
+		}
+
+		std::string buffer;
+		int nr = 0;
+		int totalLines = 0;
+
+		// Подсчитаем количество строк для вывода прогресса
+		while (std::getline(stream, buffer)) {
+			totalLines++;
+		}
+		stream.clear(); // сбрасываем состояние потока
+		stream.seekg(0); // возвращаемся в начало файла
+
+		cout << "\nКОНВЕРТИРОВАНИЕ\n" << endl;
+
+		try {
+			while (std::getline(stream, buffer)) {
+				// Проверка, что строка не пустая
+				if (buffer.length() == 0) {
+					continue;
+				}
+
+				hash160_20 h;
+				vector<unsigned char> r160;
+				if (buffer.length() == 34) {
+					if (DecodeBase58(buffer, r160)) {
+						for (int i = 1; i <= 20 && i < r160.size(); i++) {
+							h.bits20[i - 1] = r160.at(i);
+						}
+					}
+				}
+				else if (buffer.at(0) == 'b') {
+					size_t data_len = 0;
+					uint8_t* data = new uint8_t[64];
+					if (bech32_decode_my(data, &data_len, buffer.c_str())) {
+						for (int i = 0; i < data_len && i < 20; i++) {
+							h.bits20[i] = data[i];
+						}
+					}
+				}
+
+				// Запись хэша в файл (в бинарном режиме)
+				if (fwrite(h.bits20, 1, 20, file) != 20) {
+					std::cerr << "Ошибка записи в файл на строке: " << nr + 1 << endl;
+					fclose(file);
+					return false;
+				}
+
+				// Инкремент счётчика строк
+				nr++;
+
+				// Вывод обновляемого прогресса каждые 100000 строк
+				if (nr % 1000000 == 0 || nr == totalLines) {
+					cout << "\rПрогресс: " << nr << "/" << totalLines;
+					cout.flush();  // обновляем строку без новой строки
+				}
+			}
+		}
+		catch (...) {
+			std::cerr << "Произошла ошибка при обработке файла." << endl;
+			fclose(file);
+			return false;
+		}
+
+		// Закрытие файлов
+		fclose(file);
+		stream.close();
+
+		cout << endl; // Перевод строки после завершения работы
+		cout << "[+] ГОТОВО\n" << endl;
+		cout << "[+] СОРТИРОВКА:" << convfile << endl;
+
+
+		sort_file(20, convfile, outfile);
+
+		//удаляем временный convfile
+		if (remove(convfile) != 0) {
+			cout << "\033[31m"; //красный
+			cout << "\n[+] НЕУДАЛОСЬ УДАЛИТЬ:\n" << convfile << " УДАЛИТЕ ВРУЧНУЮ" << endl;
+		}
+
+		cout << "\n[+] ГОТОВО:" << outfile << endl;
+
+		// Ожидаем нажатия клавиши Enter, чтобы программа не закрывалась сразу
+		cout << text_close;
+		cout << "окно можно закрыть";
+		cin.get();  // Ждем ввода пользователя
+		return 0;
+	}
+	//------------------------------------------------------------------
+
+	//*****************************************************************************
+
+
 	// Global Init
 	Timer::Init();
 	rseed(Timer::getSeed32());
@@ -281,7 +616,6 @@ int main(int argc, char** argv)
 				return 0;
 			}
 			else if (optArg.equals("-c", "--check")) {
-				printf("  Rotor-Cuda v" RELEASE "\n\n");
 				printf("\n  Checking... Secp256K1\n\n");
 				Secp256K1* secp = new Secp256K1();
 				secp->Init();
@@ -355,7 +689,6 @@ int main(int argc, char** argv)
 				display = std::stoull(optArg.arg);
 			}
 			else if (optArg.equals("-v", "--version")) {
-				printf("Rotor-Cuda v" RELEASE "\n");
 				return 0;
 			}
 		}
@@ -520,25 +853,22 @@ int main(int argc, char** argv)
 		bok2 = bok2 + 1000;
 	}
 
-	printf("\n");
-	printf("  Rotor-Cuda v" RELEASE "\n");
-	printf("\n");
 	if (coinType == COIN_BTC)
-		printf("  COMP MODE    : %s\n", compMode == SEARCH_COMPRESSED ? "COMPRESSED" : (compMode == SEARCH_UNCOMPRESSED ? "UNCOMPRESSED" : "COMPRESSED & UNCOMPRESSED"));
-	printf("  COIN TYPE    : %s\n", coinType == COIN_BTC ? "BITCOIN" : "ETHEREUM");
-	printf("  SEARCH MODE  : %s\n", searchMode == (int)SEARCH_MODE_MA ? "Multi Address" : (searchMode == (int)SEARCH_MODE_SA ? "Single Address" : (searchMode == (int)SEARCH_MODE_MX ? "Multi X Points" : "Single X Point")));
-	printf("  DEVICE       : %s\n", (gpuEnable && nbCPUThread > 0) ? "  CPU & GPU" : ((!gpuEnable && nbCPUThread > 0) ? "CPU" : "GPU"));
-	printf("  CPU THREAD   : %d\n", nbCPUThread);
+		printf("[+] COMP MODE    : %s\n", compMode == SEARCH_COMPRESSED ? "COMPRESSED" : (compMode == SEARCH_UNCOMPRESSED ? "UNCOMPRESSED" : "COMPRESSED & UNCOMPRESSED"));
+	printf("[+] COIN TYPE    : %s\n", coinType == COIN_BTC ? "BITCOIN" : "ETHEREUM");
+	printf("[+] SEARCH MODE  : %s\n", searchMode == (int)SEARCH_MODE_MA ? "Multi Address" : (searchMode == (int)SEARCH_MODE_SA ? "Single Address" : (searchMode == (int)SEARCH_MODE_MX ? "Multi X Points" : "Single X Point")));
+	printf("[+] DEVICE       : %s\n", (gpuEnable && nbCPUThread > 0) ? "  CPU & GPU" : ((!gpuEnable && nbCPUThread > 0) ? "CPU" : "GPU"));
+	printf("[+] CPU THREAD   : %d\n", nbCPUThread);
 	nbit2 += nbCPUThread;
 	if (gpuEnable) {
-		printf("  GPU IDS      : ");
+		printf("[+] GPU IDS      : ");
 		for (int i = 0; i < gpuId.size(); i++) {
 			printf("%d", gpuId.at(i));
 			if (i + 1 < gpuId.size())
 				printf(", ");
 		}
 		printf("\n");
-		printf("  GPU GRIDSIZE : ");
+		printf("[+] GPU GRIDSIZE : ");
 		for (int i = 0; i < gridSize.size(); i++) {
 			printf("%d", gridSize.at(i));
 			if (i + 1 < gridSize.size()) {
@@ -556,21 +886,21 @@ int main(int argc, char** argv)
 		else
 			printf("\n");
 	}
-	printf("  SSE          : %s\n", useSSE ? "YES" : "NO");
+	printf("[+] SSE          : %s\n", useSSE ? "YES" : "NO");
 	
 	if (coinType == COIN_BTC) {
 		switch (searchMode) {
 		case (int)SEARCH_MODE_MA:
-			printf("  BTC HASH160s : %s\n", inputFile.c_str());
+			printf("[+] BTC HASH160s : %s\n", inputFile.c_str());
 			break;
 		case (int)SEARCH_MODE_SA:
-			printf("  BTC ADDRESS  : %s\n", address.c_str());
+			printf("[+] BTC ADDRESS  : %s\n", address.c_str());
 			break;
 		case (int)SEARCH_MODE_MX:
-			printf("  BTC XPOINTS  : %s\n", inputFile.c_str());
+			printf("[+] BTC XPOINTS  : %s\n", inputFile.c_str());
 			break;
 		case (int)SEARCH_MODE_SX:
-			printf("  BTC XPOINT   : %s\n", xpoint.c_str());
+			printf("[+] BTC XPOINT   : %s\n", xpoint.c_str());
 			break;
 		default:
 			break;
@@ -579,16 +909,16 @@ int main(int argc, char** argv)
 	else {
 		switch (searchMode) {
 		case (int)SEARCH_MODE_MA:
-			printf("  ETH ADDRESSES: %s\n", inputFile.c_str());
+			printf("[+] ETH ADDRESSES: %s\n", inputFile.c_str());
 			break;
 		case (int)SEARCH_MODE_SA:
-			printf("  ETH ADDRESS  : 0x%s\n", address.c_str());
+			printf("[+] ETH ADDRESS  : 0x%s\n", address.c_str());
 			break;
 		default:
 			break;
 		}
 	}
-	printf("  OUTPUT FILE  : %s\n", outputFile.c_str());
+	printf("[+] OUTPUT FILE  : %s\n", outputFile.c_str());
 	
 #ifdef WIN64
 	if (SetConsoleCtrlHandler(CtrlHandler, TRUE)) {
@@ -605,7 +935,7 @@ int main(int argc, char** argv)
 				maxFound, rKey, nbit2, next, zet, display, rangeStart.GetBase16(), rangeEnd.GetBase16(), should_exit);
 			break;
 		default:
-			printf("\n\n  Nothing to do, exiting\n");
+			printf("\n\n[E] Nothing to do, exiting\n");
 			return 0;
 			break;
 		}

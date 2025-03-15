@@ -1,0 +1,15 @@
+﻿cl : командная строка warning D9002: пропуск неизвестного параметра "/arch:SSE"
+  Main.cpp
+C:\Users\PC\Documents\GitHub\Rotor-Cuda\Rotor-Cuda\my_integrated_code.h(133,30): warning C4244: =: преобразование "unsigned long" в "char", возможна потеря данных
+C:\Users\PC\Documents\GitHub\Rotor-Cuda\Rotor-Cuda\Main.cpp(683,23): warning C4244: =: преобразование "unsigned __int64" в "int", возможна потеря данных
+C:\Users\PC\Documents\GitHub\Rotor-Cuda\Rotor-Cuda\Main.cpp(686,22): warning C4244: =: преобразование "unsigned __int64" в "int", возможна потеря данных
+C:\Users\PC\Documents\GitHub\Rotor-Cuda\Rotor-Cuda\Main.cpp(689,26): warning C4244: =: преобразование "unsigned __int64" в "int", возможна потеря данных
+gmp.lib(invert_limb_table.obj) : warning LNK4078: найдено несколько секций ".rdata" с разными атрибутами (C0400040)
+     Создается библиотека C:\Users\PC\Documents\GitHub\Rotor-Cuda\x64\Release\Rotor-Cuda.lib и объект C:\Users\PC\Documents\GitHub\Rotor-Cuda\x64\Release\Rotor-Cuda.exp
+LINK : warning LNK4098: библиотека по умолчанию "LIBCMT" конфликтует с использованием других библиотек; используйте /NODEFAULTLIB:library
+  Создание кода
+  2 of 930 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    25 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  Rotor-Cuda.vcxproj -> C:\Users\PC\Documents\GitHub\Rotor-Cuda\x64\Release\Rotor-Cuda.exe

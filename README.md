@@ -4,8 +4,22 @@
 This is a modified version of [KeyHunt v1.7](https://github.com/kanhavishva/KeyHunt-Cuda).
 A lot of gratitude to all the developers whose codes has been used here.
 
-Telegram group [**BTC Hunters**](https://t.me/wif500)
 
+
+###15.03.2025 Изменения(Changes)
+
+-Конвертер txt->bin встроен в программу (The txt->bin converter is built into the program)
+  Использование(Used):
+   при запуске Rotor-Cuda.exe будут созданны два примера батников для конвертирования
+   (at startup Rotor-Cuda.exe two examples of batch files for conversion will be created.)
+   
+-Немного изменил вывод информации(не всё)
+-(Slightly changed the information output (not all))
+
+
+
+
+############################################################################################
 ## Changes:
 - Default Random 95% (252-256) bit + 5% (248-252) bit
 - Random in a given bit range (1-256)
@@ -40,7 +54,6 @@ Telegram group [**BTC Hunters**](https://t.me/wif500)
 - Random: ```Rotor-Cuda.exe -t 2 -m address --coin BTC -r 1 1PWCx5fovoEaoBowAvF5k91m2Xat9bMgwb -n 125 -z 254```
 - Random for search [puzzle](https://privatekeys.pw/puzzles/bitcoin-puzzle-tx) Example puzzle64:
 - ```Rotor-Cuda.exe -t 2 -m address --coin BTC -r 1 --range 8000000000000000:ffffffffffffffff 16jY7qLJnxb7CHZyqBP8qca9d51gAjyXQN```
-- [**How to create databases**](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/) and [**additional parameters**](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/Help.md)
 ### CPU Bitcoin Multi Address mode:
 - Range: ```Rotor-Cuda.exe -t 1 -m addresses --coin BTC --range 1:1fffffffff -i puzzle_1_37_hash160_out_sorted.bin```
 - Random: ```Rotor-Cuda.exe -t 1 -m addresses --coin BTC -r 1 -i base160sorted.bin```
@@ -215,7 +228,6 @@ C:\Users\user>Rotor-Cuda.exe -t 6 -m addresses --coin BTC -i all.bin -r 1 -n 253
 - ```Rotor-Cuda.exe -g --gpui 0 --gpux 256,256 -m address --coin BTC -r 100 --range 8000000000000000:ffffffffffffffff 16jY7qLJnxb7CHZyqBP8qca9d51gAjyXQN```
 - If you know that your parameters are correct, use the expert mode -d 0 If you are using many GPUs use -d 0 for convenience 
 - If your GPU is weaker than RTX 1080 or the driver crashes. Remove **--gpux 256,256** from the row the grid will be auto-assigned.
-- [**How to create databases**](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/) and [**additional parameters**](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/Help.md)
 ---
 ### GPU Bitcoin Multi Address mode:
 - Range: ```Rotor-Cuda.exe -g --gpui 0 --gpux 256,256 -m addresses --coin BTC --range 1:1fffffffff -i puzzle_1_37_hash160_out_sorted.bin```
@@ -240,7 +252,6 @@ C:\Users\user>Rotor-Cuda.exe -t 6 -m addresses --coin BTC -i all.bin -r 1 -n 253
 ### GPU Public key Single X Point mode [Puzzle](https://privatekeys.pw/puzzles/bitcoin-puzzle-tx)120 example:
 - Range: ```Rotor-Cuda.exe -g --gpui 0 --gpux 256,256 -m xpoint --coin BTC --range 800000000000000000000000000000:ffffffffffffffffffffffffffffff ceb6cbbcdbdf5ef7150682150f4ce2c6f4807b349827dcdbdd1f2efa885a2630```
 - Random: ```Rotor-Cuda.exe -g --gpui 0 --gpux 256,256 -m xpoint -r 100 --coin BTC --range 800000000000000000000000000000:ffffffffffffffffffffffffffffff ceb6cbbcdbdf5ef7150682150f4ce2c6f4807b349827dcdbdd1f2efa885a2630```
-- [**How to create databases**](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/) and [**additional parameters**](https://github.com/phrutis/Rotor-Cuda/blob/main/Others/Help.md)
 ---
 ### Example Range mode and -n 2:
 ```

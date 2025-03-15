@@ -113,22 +113,27 @@ Rotor::Rotor(const std::string& inputFile, int compMode, int searchMode, int coi
 
 	bloom = new Bloom(2 * N, 0.000001);
 
-	uint64_t percent = (N - 1) / 100;
 	uint64_t i = 0;
 	printf("\n");
+	uint64_t nr = 0;
 	while (i < N && !should_exit) {
 		memset(buf, 0, K_LENGTH);
-		memset(DATA + (i * K_LENGTH), 0, K_LENGTH);
+
 		if (fread(buf, 1, K_LENGTH, wfd) == K_LENGTH) {
 			bloom->add(buf, K_LENGTH);
-			memcpy(DATA + (i * K_LENGTH), buf, K_LENGTH);
-			if ((percent != 0) && i % percent == 0) {
-				printf("\r  Loading      : %llu %%", (i / percent));
+			memcpy(DATA + (nr * K_LENGTH), buf, K_LENGTH); // »спользуем nr вместо i
+
+			nr++; // »нкрементируем после успешного чтени€
+
+			// ¬ывод обновл€емого прогресса каждые 1 000 000 строк
+			if (nr % 1000000 == 0 || nr == N) {
+				printf("\r[+] Loading      : %d/%d", nr, N);
 				fflush(stdout);
 			}
 		}
-		i++;
+		i++; // ќставл€ем дл€ контрол€ цикла, но теперь nr точнее отслеживает успешные записи
 	}
+
 	fclose(wfd);
 	free(buf);
 
@@ -145,12 +150,12 @@ Rotor::Rotor(const std::string& inputFile, int compMode, int searchMode, int coi
 	targetCounter = i;
 	if (coinType == COIN_BTC) {
 		if (searchMode == (int)SEARCH_MODE_MA)
-			printf("\n  Loaded       : %s Bitcoin addresses\n", formatThousands(i).c_str());
+			printf("\n[+] Loaded       : %s Bitcoin addresses\n", formatThousands(i).c_str());
 		else if (searchMode == (int)SEARCH_MODE_MX)
-			printf("\n  Loaded       : %s Bitcoin xpoints\n", formatThousands(i).c_str());
+			printf("\n[+] Loaded       : %s Bitcoin xpoints\n", formatThousands(i).c_str());
 	}
 	else {
-		printf("\n  Loaded       : %s Ethereum addresses\n", formatThousands(i).c_str());
+		printf("\n[+] Loaded       : %s Ethereum addresses\n", formatThousands(i).c_str());
 	}
 
 	printf("\n");
@@ -213,7 +218,6 @@ Rotor::Rotor(const std::vector<unsigned char>& hashORxpoint, int compMode, int s
 			((uint8_t*)xpoint)[i] = hashORxpoint.at(i);
 		}
 	}
-	printf("\n");
 
 	InitGenratorTable();
 }
@@ -237,7 +241,7 @@ void Rotor::InitGenratorTable()
 	char* ctimeBuff;
 	time_t now = time(NULL);
 	ctimeBuff = ctime(&now);
-	printf("  Start Time   : %s", ctimeBuff);
+	printf("[+] Start Time   : %s", ctimeBuff);
 
 	if (rKey < 1) {
 
@@ -255,7 +259,7 @@ void Rotor::InitGenratorTable()
 				if (i == 3) {
 					string kogda = s777;
 					if (kogda != "") {
-						printf("  Rotor        : Continuing search from BAT file. Checkpoint %s \n\n", kogda.c_str());
+						printf("[+] Checkpoint   : Continuing search from BAT file. Checkpoint %s \n\n", kogda.c_str());
 					}
 				}
 				if (i == 4) {
@@ -298,7 +302,7 @@ void Rotor::InitGenratorTable()
 				reh.Add(nextt99);
 				gir.Sub(&reh);
 				if (value777 > 1) {
-					printf("\n  Rotor info   : Continuation... Divide the remaining range %s (%d bit) into CPU %d cores \n", gir.GetBase16().c_str(), gir.GetBitLength(), nbit2);
+					printf("\n[+] Rotor info   : Continuation... Divide the remaining range %s (%d bit) into CPU %d cores \n", gir.GetBase16().c_str(), gir.GetBitLength(), nbit2);
 				}
 			}
 		}
@@ -306,9 +310,9 @@ void Rotor::InitGenratorTable()
 	else {
 
 		if (rKey == 0) {
-			printf("  Global start : %s (%d bit) - inclusive\n", this->rangeStart.GetBase16().c_str(), this->rangeStart.GetBitLength());
-			printf("  Global end   : %s (%d bit) - exclusive\n", this->rangeEnd.GetBase16().c_str(), this->rangeEnd.GetBitLength());
-			printf("  Global range : %s (%d bit)\n", this->rangeDiff2.GetBase16().c_str(), this->rangeDiff2.GetBitLength());
+			printf("[+] Global start : %s (%d bit) - inclusive\n", this->rangeStart.GetBase16().c_str(), this->rangeStart.GetBitLength());
+			printf("[+] Global end   : %s (%d bit) - exclusive\n", this->rangeEnd.GetBase16().c_str(), this->rangeEnd.GetBitLength());
+			printf("[+] Global range : %s (%d bit)\n", this->rangeDiff2.GetBase16().c_str(), this->rangeDiff2.GetBitLength());
 
 			if (nbit2 > 0) {
 				Int tThreads77;
@@ -322,10 +326,10 @@ void Rotor::InitGenratorTable()
 				reh.Add(nextt99);
 				gir.Sub(&reh);
 				if (value777 > 1) {
-					printf("\n  Rotor info   : Continuation... Divide the remaining range %s (%d bit) into CPU %d cores \n", gir.GetBase16().c_str(), gir.GetBitLength(), nbit2);
+					printf("\n[+] Rotor info   : Continuation... Divide the remaining range %s (%d bit) into CPU %d cores \n", gir.GetBase16().c_str(), gir.GetBitLength(), nbit2);
 				}
 				else {
-					printf("\n  Rotor info   : Divide the range %s (%d bit) into CPU %d cores for fast parallel search \n", rangeDiff2.GetBase16().c_str(), rangeDiff2.GetBitLength(), nbit2);
+					printf("\n[+] Rotor info   : Divide the range %s (%d bit) into CPU %d cores for fast parallel search \n", rangeDiff2.GetBase16().c_str(), rangeDiff2.GetBitLength(), nbit2);
 				}
 			}
 		}
@@ -365,33 +369,20 @@ void Rotor::output(std::string addr, std::string pAddr, std::string pAddrHex, st
 	if (outputFile.length() > 0) {
 		FILE* f = fopen(outputFile.c_str(), "a");
 		if (f == NULL) {
-			printf("  Cannot open %s for writing\n", outputFile.c_str());
+			printf("\033[31m");//красный
+			printf("[E] Cannot open %s for writing\n", outputFile.c_str());
 		} else {
+			printf("\033[32m");//зеленый
+			printf("\n[+] ======================================================\n");
+			printf("[+] %s\t%s\n", addr.c_str(), pAddrHex.c_str());
+			printf("[+] =======================================================\n");
+
+			fprintf(f,"\n[+] =========================================\n");
 			fprintf(f, "%s\t%s\n", addr.c_str(), pAddrHex.c_str());
+			fprintf(f, "[+] =========================================\n");
 			fclose(f);
 		}
 	}
-
-	// if (!needToClose)
-	// 	printf("\n");
-
-	// fprintf(f, "PubAddress: %s\n", addr.c_str());
-	// fprintf(stdout, "\n  =================================================================================\n");
-	// fprintf(stdout, "  PubAddress: %s\n", addr.c_str());
-
-	// if (coinType == COIN_BTC) {
-		// fprintf(f, "Priv (WIF): p2pkh:%s\n", pAddr.c_str());
-		// fprintf(stdout, "  Priv (WIF): p2pkh:%s\n", pAddr.c_str());
-	// }
-
-	// fprintf(f, "Priv (HEX): %s\n", pAddrHex.c_str());
-	// fprintf(stdout, "  Priv (HEX): %s\n", pAddrHex.c_str());
-
-	// fprintf(f, "PubK (HEX): %s\n", pubKey.c_str());
-	// fprintf(stdout, "  PubK (HEX): %s\n", pubKey.c_str());
-
-	// fprintf(f, "=================================================================================\n");
-	// fprintf(stdout, "  =================================================================================\n");
 
 #ifdef WIN64
 	ReleaseMutex(ghMutex);
@@ -1327,7 +1318,7 @@ void Rotor::FindKeyGPU(TH_PARAM * ph)
 	Int* gpuRangeEnds = new Int[nbThread];
 	std::vector<ITEM> found;
 
-	printf("  GPU          : %s\n", g->deviceName.c_str());
+	printf("[+] GPU          : %s\n\n", g->deviceName.c_str());
 
 	counters[thId] = 0;
 
@@ -1516,7 +1507,6 @@ void Rotor::SetupRanges(uint32_t totalThreads)
 
 void Rotor::Search(int nbThread, std::vector<int> gpuId, std::vector<int> gridSize, bool& should_exit)
 {
-
 	double t0;
 	double t1;
 	endOfSearch = false;
@@ -1808,7 +1798,7 @@ void Rotor::Search(int nbThread, std::vector<int> gpuId, std::vector<int> gridSi
 		}
 		
 		if (years88 > 300) {
-
+			printf("\033[37m");//белый
 			if (display > 0) {
 
 				if (years88 > 0) {
@@ -1821,6 +1811,7 @@ void Rotor::Search(int nbThread, std::vector<int> gpuId, std::vector<int> gridSi
 
 								if (avgGpuKeyRate > 1000000000) {
 									memset(timeStr, '\0', 256);
+									
 									printf("\r  [%s] [R: %llu] [%s] [F: %d] [GPU: %.2f Gk/s] [T: %s]   ",
 										toTimeStr(t1, timeStr),
 										rKeyCount,
@@ -1831,6 +1822,7 @@ void Rotor::Search(int nbThread, std::vector<int> gpuId, std::vector<int> gridSi
 								}
 								else {
 									memset(timeStr, '\0', 256);
+
 									printf("\r  [%s] [R: %llu] [%s] [F: %d] [GPU: %.2f Mk/s] [T: %s]   ",
 										toTimeStr(t1, timeStr),
 										rKeyCount,
